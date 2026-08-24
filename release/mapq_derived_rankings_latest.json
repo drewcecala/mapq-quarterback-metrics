@@ -16,7 +16,6 @@
       2024,
       2023
     ],
-    "roster_year": 2026,
     "quality_checks": {
       "fbs_team_count": 138,
       "play_stat_type_count": 26,
@@ -26,7 +25,8 @@
       "teams_with_quarterbacks": 138,
       "unique_quarterback_ids": true
     },
-    "retrieved_at": "2026-08-24T18:49:17.067231+00:00"
+    "roster_year": 2026,
+    "retrieved_at": "2026-08-24T18:52:15.803629+00:00"
   },
   "records": [
     {
