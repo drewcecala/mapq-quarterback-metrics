@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = {
     ".gitattributes",
+    ".github/workflows/weekly-refresh.yml",
     ".gitignore",
     "CHANGELOG.md",
     "CITATION.cff",
@@ -45,6 +46,8 @@ REQUIRED = {
     "tests/test_official.py",
     "tests/test_release.py",
     "tests/test_verify.py",
+    "tools/check_cfbd_terms.py",
+    "tools/validate_release_data.py",
 }
 FORBIDDEN_PATH_PARTS = {"outputs", "work", "scripts", "__pycache__", "node_modules"}
 SECRET_PATTERNS = {

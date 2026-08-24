@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 from mapq.release import PUBLIC_FIELDS, _write, public_records
+from tools.validate_release_data import validate
 
 
 class ReleaseTests(unittest.TestCase):
@@ -53,6 +55,54 @@ class ReleaseTests(unittest.TestCase):
         self.assertNotIn("publication_status", payload["source_metadata"])
         self.assertNotIn("network_calls", payload["source_metadata"])
         self.assertIn("defense_stress_index", payload["metric_definitions"])
+
+    def test_weekly_json_and_csv_pair_passes_quality_gates(self) -> None:
+        record = {field: None for field in PUBLIC_FIELDS}
+        record.update(
+            {
+                "mapq_rank": 1,
+                "player_name": "River Hart",
+                "team": "North Valley",
+                "conference": "Test",
+                "stats_season": 2026,
+                "mapq": 70.0,
+                "tier": "Impact",
+                "data_status": "Qualified",
+                "accuracy_score": 70.0,
+                "arm_proxy_score": 70.0,
+                "mobility_score": 70.0,
+                "escape_score": 70.0,
+                "passing_capability": 70.0,
+                "movement_capability": 70.0,
+                "reliability": 1.0,
+                "advanced_data_status": "PBP coverage/sample gap",
+            }
+        )
+        metadata = {
+            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "roster_year": 2026,
+            "production_seasons": [2026, 2025, 2024, 2023],
+            "quality_checks": {
+                "fbs_team_count": 138,
+                "quarterback_count": 700,
+                "quarterback_team_coverage": 1.0,
+                "unique_quarterback_ids": True,
+                "required_play_stat_types_present": True,
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            json_path = Path(directory) / "release.json"
+            csv_path = Path(directory) / "release.csv"
+            _write(json_path, [record], metadata)
+            _write(csv_path, [record], metadata)
+            errors = validate(
+                json_path,
+                csv_path,
+                minimum_records=1,
+                roster_year=2026,
+                current_season=2026,
+            )
+        self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

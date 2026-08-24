@@ -1,13 +1,34 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 from mapq.cfbd import (
+    API_BASE,
+    CFBDClient,
     aggregate_play_stats,
     build_normalized_dataset,
     validate_cohort,
     validate_play_stat_types,
 )
+
+
+class FakeHTTPResponse:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+    def read(self):
+        return json.dumps(self.payload).encode("utf-8")
 
 
 class FakeClient:
@@ -69,6 +90,27 @@ def sample_play_rows():
 
 
 class CFBDPipelineTests(unittest.TestCase):
+    def test_refresh_year_bypasses_cache_once_per_run(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cache_dir = Path(directory)
+            url = f"{API_BASE}/games?year=2026"
+            cache_path = cache_dir / f"{hashlib.sha256(url.encode()).hexdigest()}.json"
+            cache_path.write_text('[{"status": "stale"}]', encoding="utf-8")
+            client = CFBDClient(
+                api_key="-".join(("test", "key")),
+                cache_dir=cache_dir,
+                retries=1,
+                refresh_years=(2026,),
+            )
+            with patch(
+                "mapq.cfbd.urllib.request.urlopen",
+                return_value=FakeHTTPResponse([{"status": "fresh"}]),
+            ) as urlopen:
+                self.assertEqual(client.get("/games", year=2026)[0]["status"], "fresh")
+                self.assertEqual(client.get("/games", year=2026)[0]["status"], "fresh")
+            self.assertEqual(urlopen.call_count, 1)
+            self.assertEqual(client.network_calls, 1)
+
     def test_required_play_stat_types_fail_closed(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "sack_taken"):
             validate_play_stat_types([{"name": "Completion"}])

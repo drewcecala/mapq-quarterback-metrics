@@ -21,7 +21,7 @@ from typing import Any, Iterable, Mapping
 
 API_BASE = "https://api.collegefootballdata.com"
 TERMS_URL = "https://collegefootballdata.com/terms"
-DEFAULT_SEASONS = (2025, 2024, 2023)
+DEFAULT_SEASONS = (2026, 2025, 2024, 2023)
 PLAY_STATS_LIMIT = 2_000
 REQUIRED_PLAY_STAT_TYPES = frozenset(
     {
@@ -137,6 +137,7 @@ class CFBDClient:
         cache_dir: Path | str = Path("work/cfbd_cache"),
         call_budget: int = 900,
         retries: int = 3,
+        refresh_years: Iterable[int] = (),
     ) -> None:
         self.api_key = (api_key or os.environ.get("CFBD_API_KEY", "")).strip()
         if not self.api_key:
@@ -148,7 +149,18 @@ class CFBDClient:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.call_budget = call_budget
         self.retries = retries
+        self.refresh_years = frozenset(int(year) for year in refresh_years)
+        self._refreshed_cache_keys: set[str] = set()
         self.network_calls = 0
+
+    def _refresh_requested(self, params: Mapping[str, Any]) -> bool:
+        value = params.get("year")
+        if value is None:
+            return False
+        try:
+            return int(value) in self.refresh_years
+        except (TypeError, ValueError):
+            return False
 
     def get(self, path: str, **params: Any) -> Any:
         clean_params = {key: value for key, value in params.items() if value is not None}
@@ -156,7 +168,10 @@ class CFBDClient:
         url = f"{API_BASE}{path}" + (f"?{query}" if query else "")
         cache_key = hashlib.sha256(url.encode("utf-8")).hexdigest()
         cache_path = self.cache_dir / f"{cache_key}.json"
-        if cache_path.exists():
+        refresh_requested = self._refresh_requested(clean_params)
+        if cache_path.exists() and (
+            not refresh_requested or cache_key in self._refreshed_cache_keys
+        ):
             return json.loads(cache_path.read_text(encoding="utf-8"))
 
         last_error: Exception | None = None
@@ -170,7 +185,7 @@ class CFBDClient:
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
                     "Accept": "application/json",
-                    "User-Agent": "mapq-quarterback-metrics/1.0",
+                    "User-Agent": "mapq-quarterback-metrics/1.1",
                 },
             )
             try:
@@ -178,6 +193,8 @@ class CFBDClient:
                 with urllib.request.urlopen(request, timeout=45) as response:
                     payload = json.loads(response.read().decode("utf-8"))
                 cache_path.write_text(json.dumps(payload), encoding="utf-8")
+                if refresh_requested:
+                    self._refreshed_cache_keys.add(cache_key)
                 return payload
             except urllib.error.HTTPError as exc:
                 last_error = exc
@@ -538,14 +555,40 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("work/cfbd_normalized.json"))
     parser.add_argument("--cache-dir", type=Path, default=Path("work/cfbd_cache"))
     parser.add_argument("--roster-year", type=int, default=2026)
+    parser.add_argument(
+        "--seasons",
+        type=int,
+        nargs="+",
+        default=list(DEFAULT_SEASONS),
+        help="Production seasons in newest-to-oldest selection order",
+    )
+    parser.add_argument(
+        "--refresh-year",
+        type=int,
+        action="append",
+        dest="refresh_years",
+        default=[],
+        help="Bypass existing cache entries for this year; repeat as needed",
+    )
     parser.add_argument("--call-budget", type=int, default=900)
     parser.add_argument("--skip-pbp", action="store_true")
     args = parser.parse_args(argv)
 
-    client = CFBDClient(cache_dir=args.cache_dir, call_budget=args.call_budget)
+    seasons = tuple(args.seasons)
+    if len(seasons) != len(set(seasons)):
+        parser.error("--seasons cannot contain duplicates")
+    if seasons != tuple(sorted(seasons, reverse=True)):
+        parser.error("--seasons must be ordered from newest to oldest")
+
+    client = CFBDClient(
+        cache_dir=args.cache_dir,
+        call_budget=args.call_budget,
+        refresh_years=args.refresh_years,
+    )
     payload = build_normalized_dataset(
         client,
         roster_year=args.roster_year,
+        seasons=seasons,
         include_pbp=not args.skip_pbp,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)

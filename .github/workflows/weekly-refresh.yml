@@ -1,0 +1,106 @@
+name: weekly in-season rankings refresh
+
+on:
+  schedule:
+    - cron: "17 11 * 1,9-12 3"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-in-season-rankings-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Run unit and repository checks
+        run: |
+          python -m unittest discover -s tests -v
+          python tools/release_check.py
+      - name: Confirm source terms are unchanged
+        run: python tools/check_cfbd_terms.py --expected "August 12, 2026"
+      - name: Restore encrypted private API cache
+        uses: actions/cache@v4
+        with:
+          path: work/cfbd_cache.tar.gz.enc
+          key: cfbd-cache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            cfbd-cache-${{ runner.os }}-
+      - name: Decrypt private API cache
+        env:
+          CFBD_CACHE_KEY: ${{ secrets.CFBD_CACHE_KEY }}
+        run: |
+          if [[ -z "${CFBD_CACHE_KEY:-}" ]]; then
+            echo "CFBD_CACHE_KEY repository secret is not configured." >&2
+            exit 1
+          fi
+          mkdir -p work/cfbd_cache
+          if [[ -f work/cfbd_cache.tar.gz.enc ]]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
+              -pass env:CFBD_CACHE_KEY \
+              -in work/cfbd_cache.tar.gz.enc \
+              | tar -xzf - -C work
+          fi
+      - name: Pull and normalize authorized statistics
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+        run: |
+          if [[ -z "${CFBD_API_KEY:-}" ]]; then
+            echo "CFBD_API_KEY repository secret is not configured." >&2
+            exit 1
+          fi
+          mapq-cfbd \
+            --output work/cfbd_normalized.json \
+            --cache-dir work/cfbd_cache \
+            --roster-year 2026 \
+            --seasons 2026 2025 2024 2023 \
+            --refresh-year 2026 \
+            --call-budget 225
+      - name: Encrypt private API cache
+        env:
+          CFBD_CACHE_KEY: ${{ secrets.CFBD_CACHE_KEY }}
+        run: |
+          tar -czf - -C work cfbd_cache \
+            | openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 \
+                -pass env:CFBD_CACHE_KEY \
+                -out work/cfbd_cache.tar.gz.enc
+      - name: Score and sanitize release
+        run: |
+          mapq work/cfbd_normalized.json work/cfbd_scored.json
+          mapq-release work/cfbd_scored.json release/mapq_derived_rankings_latest.json
+          mapq-release work/cfbd_scored.json release/mapq_derived_rankings_latest.csv
+      - name: Validate generated datasets
+        run: |
+          python tools/validate_release_data.py \
+            release/mapq_derived_rankings_latest.json \
+            release/mapq_derived_rankings_latest.csv \
+            --minimum-records 150 \
+            --roster-year 2026 \
+            --current-season 2026
+          python tools/release_check.py
+      - name: Commit derived updates
+        run: |
+          git add \
+            release/mapq_derived_rankings_latest.json \
+            release/mapq_derived_rankings_latest.csv
+          if git diff --cached --quiet; then
+            echo "No derived ranking changes to publish."
+            exit 0
+          fi
+          git diff --cached --check
+          python tools/release_check.py
+          git config user.name "drewcecala"
+          git config user.email "drewcecala@gmail.com"
+          git commit -m "Refresh weekly QB rankings ($(date -u +%F))"
+          git push origin HEAD:main

@@ -16,6 +16,12 @@ The 2026 roster refresh produced 228 MAP-Q-eligible quarterbacks from a private 
 
 The release was retrieved on August 24, 2026 and selects each current quarterback's most recent qualifying production season from 2023–2025. Situational metrics remain blank when play-by-play coverage or the minimum sample is insufficient.
 
+## Weekly in-season refresh
+
+The [weekly refresh workflow](.github/workflows/weekly-refresh.yml) runs Wednesdays at 11:17 UTC from September through January and can also be started manually. It refreshes the 2026 roster and statistics, reuses encrypted historical caches to conserve API calls, validates the full cohort, and publishes only the derived [latest JSON](release/mapq_derived_rankings_latest.json) and [latest CSV](release/mapq_derived_rankings_latest.csv). The stable latest links become available after the first successful run.
+
+The workflow requires a repository Actions secret named `CFBD_API_KEY`; a separate `CFBD_CACHE_KEY` encrypts cached API responses at rest. Each secret is provided only to the step that needs it and is never written to a release file or log. The job stops if the CFBD Terms effective date changes, source coverage falls below its quality gates, the per-run 225-call budget is reached, or release validation fails.
+
 ## Why MAP-Q is different
 
 The headline score is geometric rather than additive:
@@ -63,7 +69,10 @@ The source adapter uses a user-owned CollegeFootballData key and writes all sour
 
 ```bash
 export CFBD_API_KEY="$YOUR_SECURE_KEY"
-mapq-cfbd --output work/cfbd_normalized.json
+mapq-cfbd \
+  --output work/cfbd_normalized.json \
+  --seasons 2026 2025 2024 2023 \
+  --refresh-year 2026
 mapq work/cfbd_normalized.json work/cfbd_scored.json
 mapq-release work/cfbd_scored.json outputs/mapq_derived_rankings.json
 ```

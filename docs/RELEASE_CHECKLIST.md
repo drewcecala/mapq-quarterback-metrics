@@ -26,6 +26,6 @@
 - [ ] Confirm the example remains fictional and marked `synthetic: true`.
 - [ ] Confirm `CITATION.cff`, the changelog, package version, and model version agree.
 - [ ] Add the final repository URL to `CITATION.cff` only after the repository exists.
-- [ ] Create a signed or annotated `v1.0.0` release tag after the reviewed commit is final.
+- [ ] Create a signed or annotated release tag matching the package and model version after the reviewed commit is final.
 
 Public repository visibility is not a substitute for data-redistribution permission.

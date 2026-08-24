@@ -56,7 +56,7 @@ def _write_records(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Score a full quarterback cohort with MAP-Q model 1.0.0."
+        description="Score a full quarterback cohort with MAP-Q model 1.1.0."
     )
     parser.add_argument("input", type=Path, help="Input .json or .csv file")
     parser.add_argument("output", type=Path, help="Output .json or .csv file")

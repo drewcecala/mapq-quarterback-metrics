@@ -95,6 +95,8 @@ The optional CFBD statistics pipeline must:
 
 The CFBD free tier currently advertises 1,000 calls per month. A team-season or selected-player PBP strategy should stay below that limit for a full refresh; the pipeline must count calls and stop before exceeding a configured budget.
 
+The scheduled workflow restores an encrypted GitHub Actions cache for immutable historical responses, decrypts it only inside the ephemeral runner, force-refreshes 2026 endpoints once per run, and stops at 225 network calls. Before acquisition, it confirms that the published CFBD Terms still carry the reviewed August 12, 2026 effective date; a change blocks publication pending human review.
+
 ## Quality risks requiring tests
 
 | Risk | Severity | Required control |

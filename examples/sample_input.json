@@ -3,7 +3,7 @@
   "description": "Fictional quarterbacks for demonstrating cohort-relative scoring.",
   "records": [
     {
-      "player_id": "syn-001", "player_name": "River Hart", "team": "North Valley", "stats_season": 2025,
+      "player_id": "syn-001", "player_name": "River Hart", "team": "North Valley", "stats_season": 2026,
       "pass_attempts": 310, "completions": 213, "pass_yards": 2840, "interceptions": 7, "long_pass": 68,
       "sacks": 18, "rush_attempts": 92, "rush_yards": 648, "long_rush": 54,
       "pbp_pass_attempts": 306, "pbp_qb_rushes": 74, "pbp_sacks": 18, "pbp_explosive_plays": 61,
@@ -11,7 +11,7 @@
       "pbp_third_down_tds": 8, "pbp_third_down_sacks": 4, "pbp_escape_opportunities": 22, "pbp_escape_explosives": 10
     },
     {
-      "player_id": "syn-002", "player_name": "Cal Mercer", "team": "Coastal Tech", "stats_season": 2025,
+      "player_id": "syn-002", "player_name": "Cal Mercer", "team": "Coastal Tech", "stats_season": 2026,
       "pass_attempts": 355, "completions": 238, "pass_yards": 3315, "interceptions": 10, "long_pass": 74,
       "sacks": 27, "rush_attempts": 73, "rush_yards": 324, "long_rush": 38,
       "pbp_pass_attempts": 349, "pbp_qb_rushes": 47, "pbp_sacks": 27, "pbp_explosive_plays": 65,
@@ -19,7 +19,7 @@
       "pbp_third_down_tds": 7, "pbp_third_down_sacks": 7, "pbp_escape_opportunities": 24, "pbp_escape_explosives": 7
     },
     {
-      "player_id": "syn-003", "player_name": "Jalen Frost", "team": "Red Plains", "stats_season": 2025,
+      "player_id": "syn-003", "player_name": "Jalen Frost", "team": "Red Plains", "stats_season": 2026,
       "pass_attempts": 276, "completions": 184, "pass_yards": 2235, "interceptions": 5, "long_pass": 59,
       "sacks": 12, "rush_attempts": 119, "rush_yards": 785, "long_rush": 61,
       "pbp_pass_attempts": 274, "pbp_qb_rushes": 102, "pbp_sacks": 12, "pbp_explosive_plays": 56,
@@ -27,7 +27,7 @@
       "pbp_third_down_tds": 6, "pbp_third_down_sacks": 3, "pbp_escape_opportunities": 26, "pbp_escape_explosives": 12
     },
     {
-      "player_id": "syn-004", "player_name": "Owen Pike", "team": "Lake State", "stats_season": 2024,
+      "player_id": "syn-004", "player_name": "Owen Pike", "team": "Lake State", "stats_season": 2025,
       "pass_attempts": 332, "completions": 221, "pass_yards": 2688, "interceptions": 9, "long_pass": 62,
       "sacks": 22, "rush_attempts": 61, "rush_yards": 168, "long_rush": 27,
       "pbp_pass_attempts": 328, "pbp_qb_rushes": 39, "pbp_sacks": 22, "pbp_explosive_plays": 48,
@@ -35,7 +35,7 @@
       "pbp_third_down_tds": 5, "pbp_third_down_sacks": 6, "pbp_escape_opportunities": 21, "pbp_escape_explosives": 5
     },
     {
-      "player_id": "syn-005", "player_name": "Micah Stone", "team": "Capital A&M", "stats_season": 2025,
+      "player_id": "syn-005", "player_name": "Micah Stone", "team": "Capital A&M", "stats_season": 2026,
       "pass_attempts": 248, "completions": 170, "pass_yards": 1975, "interceptions": 4, "long_pass": 52,
       "sacks": 9, "rush_attempts": 88, "rush_yards": 512, "long_rush": 45,
       "pbp_pass_attempts": 244, "pbp_qb_rushes": 73, "pbp_sacks": 9, "pbp_explosive_plays": 43,
@@ -43,7 +43,7 @@
       "pbp_third_down_tds": 5, "pbp_third_down_sacks": 2, "pbp_escape_opportunities": 18, "pbp_escape_explosives": 8
     },
     {
-      "player_id": "syn-006", "player_name": "Theo Banks", "team": "Western Union", "stats_season": 2023,
+      "player_id": "syn-006", "player_name": "Theo Banks", "team": "Western Union", "stats_season": 2024,
       "pass_attempts": 205, "completions": 126, "pass_yards": 1510, "interceptions": 12, "long_pass": 49,
       "sacks": 31, "rush_attempts": 66, "rush_yards": 104, "long_rush": 25,
       "pbp_pass_attempts": 202, "pbp_qb_rushes": 35, "pbp_sacks": 31, "pbp_explosive_plays": 29,
@@ -51,7 +51,7 @@
       "pbp_third_down_tds": 3, "pbp_third_down_sacks": 9, "pbp_escape_opportunities": 27, "pbp_escape_explosives": 4
     },
     {
-      "player_id": "syn-007", "player_name": "Mason Vale", "team": "Pine College", "stats_season": 2025,
+      "player_id": "syn-007", "player_name": "Mason Vale", "team": "Pine College", "stats_season": 2026,
       "pass_attempts": 44, "completions": 29, "pass_yards": 390, "interceptions": 2, "long_pass": 41,
       "sacks": 5, "rush_attempts": 21, "rush_yards": 122, "long_rush": 31,
       "pbp_pass_attempts": 43, "pbp_qb_rushes": 16, "pbp_sacks": 5, "pbp_explosive_plays": 8,

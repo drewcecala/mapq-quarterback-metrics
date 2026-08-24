@@ -1,6 +1,6 @@
 # MAP-Q methodology
 
-Model version: **1.0.0**
+Model version: **1.1.0**
 
 ## Cohorts and eligibility
 
@@ -11,8 +11,8 @@ The engine expects one selected season per quarterback.
 | Minimum sample to score | 20 pass attempts and 40 offensive opportunities |
 | Stable benchmark cohort | 100 pass attempts and 125 offensive opportunities |
 | Full-reliability anchors | 250 pass attempts and 300 offensive opportunities |
-| Supported seasons | 2023, 2024, 2025 |
-| Season weights | 2025: 1.00; 2024: 0.85; 2023: 0.70 |
+| Supported seasons | 2023, 2024, 2025, 2026 |
+| Season weights | 2026: 1.00; 2025: 0.85; 2024: 0.70; 2023: 0.55 |
 
 Offensive opportunities are pass attempts plus official quarterback rush attempts. A scored player may fall below the benchmark threshold; that player's percentiles are still measured against the stable benchmark cohort and the final score is pulled toward 50.
 

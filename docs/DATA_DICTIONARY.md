@@ -8,7 +8,7 @@ The scorer accepts a JSON array, a JSON object with a `records` array, or a CSV 
 |---|---|---|
 | `player_id` | string | Unique identifier within the input cohort |
 | `player_name` | string | Display name used for deterministic tie-breaking |
-| `stats_season` | integer or null | Selected production season; supported values are 2023–2025 |
+| `stats_season` | integer or null | Selected production season; supported values are 2023–2026 |
 
 ## Official-season inputs
 

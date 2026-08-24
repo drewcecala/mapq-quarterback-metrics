@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 — 2026-08-24
+
+- Added 2026 production-season support and rolled recency weights forward while retaining 2023 as a reduced-weight fallback.
+- Added explicit current-year cache refreshes so weekly pulls reuse historical responses without serving stale in-season statistics.
+- Added an in-season GitHub Actions workflow for authorized acquisition, scoring, release validation, and derived-only publication.
+- Added fail-closed checks for source-terms changes, cohort coverage, freshness, field contracts, duplicate identities, score ranges, and JSON/CSV parity.
+
 ## 1.0.0 — 2026-08-24
 
 - Published the MAP-Q scoring contract and reference implementation.

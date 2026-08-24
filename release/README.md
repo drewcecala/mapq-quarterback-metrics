@@ -2,6 +2,13 @@
 
 This directory is reserved for sanitized, derived-only MAP-Q releases. A release may include player and team names as report context, model scores, ranks, tiers, reliability, metric definitions, retrieval date, model version, and the attribution “Data provided by CollegeFootballData.com.”
 
+## Latest in-season release
+
+- [Latest JSON](mapq_derived_rankings_latest.json) — stable machine-readable URL with definitions and retrieval metadata.
+- [Latest CSV](mapq_derived_rankings_latest.csv) — stable spreadsheet-ready URL.
+
+The latest files are updated by the validated weekly workflow during September–January and appear after its first successful run. Git history preserves prior weekly versions.
+
 ## August 24, 2026
 
 - [JSON release](mapq_derived_rankings_2026-08-24.json) — includes definitions, source attribution, retrieval metadata, and 228 ranked records.

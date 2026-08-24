@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import Any, Iterable, Mapping
 
-MODEL_VERSION = "1.0.0"
+MODEL_VERSION = "1.1.0"
 
 
 @dataclass(frozen=True)
@@ -18,9 +18,10 @@ class ModelConfig:
     full_reliability_pass_attempts: int = 250
     full_reliability_offensive_opportunities: int = 300
     season_weights: tuple[tuple[int, float], ...] = (
-        (2025, 1.00),
-        (2024, 0.85),
-        (2023, 0.70),
+        (2026, 1.00),
+        (2025, 0.85),
+        (2024, 0.70),
+        (2023, 0.55),
     )
     pbp_coverage_min: float = 0.85
     pbp_coverage_max: float = 1.15
@@ -239,6 +240,7 @@ def score_records(
 
     benchmark = [row for row in rows if _is_benchmark(row, config)]
     scoreable = [row for row in rows if _is_scoreable(row, config)]
+    current_season = max(dict(config.season_weights))
     if scoreable and not benchmark:
         raise ValueError("scoreable players exist but the stable benchmark cohort is empty")
 
@@ -309,7 +311,9 @@ def score_records(
             )
             if _is_benchmark(row, config):
                 row["data_status"] = (
-                    "Qualified" if row["stats_season"] == 2025 else "Qualified - older season"
+                    "Qualified"
+                    if row["stats_season"] == current_season
+                    else "Qualified - older season"
                 )
             else:
                 row["data_status"] = "Provisional"
