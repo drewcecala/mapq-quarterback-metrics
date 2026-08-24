@@ -13,7 +13,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  season_window:
+    runs-on: ubuntu-latest
+    outputs:
+      run_refresh: ${{ steps.window.outputs.run_refresh }}
+    steps:
+      - id: window
+        name: Check the 2026 season window
+        run: |
+          today=$(date -u +%F)
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "run_refresh=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$today" < "2026-09-01" || "$today" > "2027-01-31" ]]; then
+            echo "run_refresh=false" >> "$GITHUB_OUTPUT"
+            echo "Outside the September 2026-January 2027 refresh window."
+          else
+            echo "run_refresh=true" >> "$GITHUB_OUTPUT"
+          fi
+
   refresh:
+    needs: season_window
+    if: needs.season_window.outputs.run_refresh == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:

@@ -18,7 +18,7 @@ The release was retrieved on August 24, 2026 and selects each current quarterbac
 
 ## Weekly in-season refresh
 
-The [weekly refresh workflow](.github/workflows/weekly-refresh.yml) runs Wednesdays at 11:17 UTC from September through January and can also be started manually. It refreshes the 2026 roster and statistics, reuses encrypted historical caches to conserve API calls, validates the full cohort, and publishes only the derived [latest JSON](release/mapq_derived_rankings_latest.json) and [latest CSV](release/mapq_derived_rankings_latest.csv). The stable latest links become available after the first successful run.
+The [weekly refresh workflow](.github/workflows/weekly-refresh.yml) runs Wednesdays at 11:17 UTC from September 2026 through January 2027 and can also be started manually. It refreshes the 2026 roster and statistics, reuses encrypted historical caches to conserve API calls, validates the full cohort, and publishes only the derived [latest JSON](release/mapq_derived_rankings_latest.json) and [latest CSV](release/mapq_derived_rankings_latest.csv). An explicit season-window guard prevents the 2026 configuration from running on a future season.
 
 The workflow requires a repository Actions secret named `CFBD_API_KEY`; a separate `CFBD_CACHE_KEY` encrypts cached API responses at rest. Each secret is provided only to the step that needs it and is never written to a release file or log. The job stops if the CFBD Terms effective date changes, source coverage falls below its quality gates, the per-run 225-call budget is reached, or release validation fails.
 
