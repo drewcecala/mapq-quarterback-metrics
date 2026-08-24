@@ -9,3 +9,4 @@
 - Separated source-restricted player data, API caches, and private workbooks from the public package.
 - Added an authorized CollegeFootballData acquisition adapter with private caching, call budgets, response-limit partitioning, and player-linked play aggregation.
 - Added a derived-only release command that strips official statistics, source identifiers, and unscored roster rows.
+- Added the August 24, 2026 derived-ranking release in JSON and CSV formats: 228 eligible quarterbacks selected from a 721-player, 138-team FBS cohort.

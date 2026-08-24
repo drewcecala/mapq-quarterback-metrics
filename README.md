@@ -10,6 +10,12 @@ The repository also defines three situational metrics:
 
 This public package contains the scoring engine, complete formulas, validation rules, tests, a fictional example, a no-key official-roster verifier, and an optional CollegeFootballData acquisition adapter. It intentionally excludes real-player source data, page caches, API caches, and private generated workbooks. See [Data rights](docs/DATA_RIGHTS.md) before combining the engine with third-party data.
 
+## Current derived rankings
+
+The 2026 roster refresh produced 228 MAP-Q-eligible quarterbacks from a private 721-player FBS quarterback cohort. Download the sanitized [JSON](release/mapq_derived_rankings_2026-08-24.json) or [CSV](release/mapq_derived_rankings_2026-08-24.csv) release. The files contain model outputs and report context, not raw provider statistics.
+
+The release was retrieved on August 24, 2026 and selects each current quarterback's most recent qualifying production season from 2023–2025. Situational metrics remain blank when play-by-play coverage or the minimum sample is insufficient.
+
 ## Why MAP-Q is different
 
 The headline score is geometric rather than additive:
