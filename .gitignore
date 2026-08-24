@@ -1,0 +1,22 @@
+# Generated and source-restricted materials
+/outputs/
+/work/
+/scripts/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local release checks
+release-audit.json

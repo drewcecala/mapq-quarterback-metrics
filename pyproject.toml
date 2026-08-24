@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapq-quarterback-metrics"
+version = "1.0.0"
+description = "Transparent quarterback mobility and passing composite metrics"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Drew Cecala" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = []
+
+[project.scripts]
+mapq = "mapq.cli:main"
+mapq-cfbd = "mapq.cfbd:main"
+mapq-release = "mapq.release:main"
+mapq-verify = "mapq.verify:main"
+mapq-verify-official = "mapq.official:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

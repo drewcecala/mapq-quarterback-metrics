@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this metric engine, please cite it with the model version."
+title: "MAP-Q Quarterback Metric Engine"
+version: 1.0.0
+date-released: 2026-08-24
+authors:
+  - family-names: "Cecala"
+    given-names: "Drew"
+license: MIT
+keywords:
+  - college football
+  - quarterback evaluation
+  - sports analytics
+  - reproducible metrics
