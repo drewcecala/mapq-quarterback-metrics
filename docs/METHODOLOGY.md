@@ -1,6 +1,6 @@
 # MAP-Q methodology
 
-Model version: **1.1.0**
+Model version: **1.1.1**
 
 ## Cohorts and eligibility
 

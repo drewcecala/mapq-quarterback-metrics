@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 from mapq.model import _midrank, score_records
@@ -43,6 +44,16 @@ class ModelTests(unittest.TestCase):
         row = self.by_id["syn-008"]
         self.assertIsNone(row.get("mapq"))
         self.assertEqual(row["data_status"], "No college stats")
+        self.assertEqual(row["advanced_data_status"], "Unscored")
+
+    def test_missing_sacks_are_unscored_instead_of_treated_as_zero(self) -> None:
+        records = deepcopy(json.loads((ROOT / "examples" / "sample_input.json").read_text())["records"])
+        target = next(row for row in records if row["player_id"] == "syn-001")
+        target.pop("sacks")
+        row = next(row for row in score_records(records) if row["player_id"] == "syn-001")
+        self.assertIsNone(row.get("mapq"))
+        self.assertIsNone(row["sack_avoidance"])
+        self.assertEqual(row["data_status"], "Missing sack data")
         self.assertEqual(row["advanced_data_status"], "Unscored")
 
     def test_advanced_metrics_clear_for_qualified_example(self) -> None:

@@ -67,6 +67,7 @@ class FakeClient:
                     {"season": 2025, "playerId": "101", "player": "River Hart", "position": "QB", "team": "North Valley", "conference": "Test", "category": "passing", "statType": "COMPLETIONS", "stat": "90"},
                     {"season": 2025, "playerId": "101", "player": "River Hart", "position": "QB", "team": "North Valley", "conference": "Test", "category": "passing", "statType": "YDS", "stat": "1200"},
                     {"season": 2025, "playerId": "101", "player": "River Hart", "position": "QB", "team": "North Valley", "conference": "Test", "category": "passing", "statType": "INT", "stat": "4"},
+                    {"season": 2025, "playerId": "101", "player": "River Hart", "position": "QB", "team": "North Valley", "conference": "Test", "category": "passing", "statType": "SACK", "stat": "4"},
                 ]
             return [
                 {"season": 2025, "playerId": "101", "player": "River Hart", "position": "QB", "team": "North Valley", "conference": "Test", "category": "rushing", "statType": "CAR", "stat": "30"},
@@ -75,6 +76,51 @@ class FakeClient:
         if path == "/plays/stats":
             return sample_play_rows()
         raise AssertionError((path, params))
+
+
+class MissingSackClient(FakeClient):
+    def get(self, path: str, **params):
+        rows = super().get(path, **params)
+        if path == "/stats/player/season" and params["category"] == "passing":
+            return [row for row in rows if row.get("statType") not in {"SACK", "SACKS"}]
+        return rows
+
+
+class CompletePbpMissingSackClient(MissingSackClient):
+    def get(self, path: str, **params):
+        if path == "/plays/stats":
+            common = {
+                "gameId": 1,
+                "season": 2025,
+                "week": 1,
+                "team": "North Valley",
+                "conference": "Test",
+                "athleteId": "101",
+                "athleteName": "River Hart",
+            }
+            passes = [
+                {
+                    **common,
+                    "playId": f"pass-{index}",
+                    "down": 1,
+                    "distance": 10,
+                    "statType": "Completion",
+                    "stat": 5,
+                }
+                for index in range(140)
+            ]
+            return [
+                *passes,
+                {
+                    **common,
+                    "playId": "sack-1",
+                    "down": 2,
+                    "distance": 8,
+                    "statType": "Sack Taken",
+                    "stat": -7,
+                },
+            ]
+        return super().get(path, **params)
 
 
 def sample_play_rows():
@@ -147,11 +193,33 @@ class CFBDPipelineTests(unittest.TestCase):
         self.assertEqual(river["stats_season"], 2025)
         self.assertEqual(river["pass_attempts"], 140)
         self.assertEqual(river["rush_attempts"], 30)
-        self.assertEqual(river["sacks"], 1)
+        self.assertEqual(river["sacks"], 4)
+        self.assertEqual(river["sacks_source"], "season")
         self.assertEqual(river["long_pass"], 7)
         self.assertEqual(river["long_rush"], 16)
         cal = next(row for row in payload["records"] if row["player_id"] == "102")
         self.assertIsNone(cal["stats_season"])
+
+    def test_partial_pbp_does_not_fill_missing_season_sacks(self) -> None:
+        payload = build_normalized_dataset(
+            MissingSackClient(), minimum_teams=1, minimum_qbs=1, minimum_team_coverage=0.5
+        )
+        river = next(row for row in payload["records"] if row["player_id"] == "101")
+        self.assertIsNone(river["sacks"])
+        self.assertIsNone(river["sacks_source"])
+        self.assertLess(river["pbp_pass_attempts"] / river["pass_attempts"], 0.85)
+
+    def test_complete_pbp_can_fill_missing_season_sacks(self) -> None:
+        payload = build_normalized_dataset(
+            CompletePbpMissingSackClient(),
+            minimum_teams=1,
+            minimum_qbs=1,
+            minimum_team_coverage=0.5,
+        )
+        river = next(row for row in payload["records"] if row["player_id"] == "101")
+        self.assertEqual(river["sacks"], 1)
+        self.assertEqual(river["sacks_source"], "play-by-play")
+        self.assertEqual(river["pbp_pass_attempts"] / river["pass_attempts"], 1.0)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import Any, Iterable, Mapping
 
-MODEL_VERSION = "1.1.0"
+MODEL_VERSION = "1.1.1"
 
 
 @dataclass(frozen=True)
@@ -38,7 +38,6 @@ _COUNT_FIELDS = (
     "completions",
     "interceptions",
     "long_pass",
-    "sacks",
     "rush_attempts",
     "long_rush",
     "pbp_pass_attempts",
@@ -53,6 +52,7 @@ _COUNT_FIELDS = (
     "pbp_escape_opportunities",
     "pbp_escape_explosives",
 )
+_OPTIONAL_COUNT_FIELDS = ("sacks",)
 _YARD_FIELDS = ("pass_yards", "rush_yards")
 _BASE_PERCENTILE_METRICS = {
     "completion_percentile": "completion_rate",
@@ -101,6 +101,7 @@ def _is_scoreable(row: Mapping[str, Any], config: ModelConfig) -> bool:
         row["pass_attempts"] >= config.score_min_pass_attempts
         and row["offensive_opportunities"] >= config.score_min_offensive_opportunities
         and row["stats_season"] is not None
+        and row["sacks"] is not None
     )
 
 
@@ -109,6 +110,7 @@ def _is_benchmark(row: Mapping[str, Any], config: ModelConfig) -> bool:
         row["pass_attempts"] >= config.benchmark_min_pass_attempts
         and row["offensive_opportunities"] >= config.benchmark_min_offensive_opportunities
         and row["stats_season"] is not None
+        and row["sacks"] is not None
     )
 
 
@@ -144,8 +146,14 @@ def _prepare_record(record: Mapping[str, Any], config: ModelConfig) -> dict[str,
 
     for field in _COUNT_FIELDS + _YARD_FIELDS:
         row[field] = _as_int(row, field)
+    for field in _OPTIONAL_COUNT_FIELDS:
+        value = row.get(field)
+        row[field] = None if value in (None, "") else _as_int(row, field)
     for field in _COUNT_FIELDS:
         if row[field] < 0:
+            raise ValueError(f"{player_name}: {field} cannot be negative")
+    for field in _OPTIONAL_COUNT_FIELDS:
+        if row[field] is not None and row[field] < 0:
             raise ValueError(f"{player_name}: {field} cannot be negative")
 
     if row["completions"] > row["pass_attempts"]:
@@ -176,15 +184,30 @@ def _prepare_record(record: Mapping[str, Any], config: ModelConfig) -> dict[str,
     row["yards_per_completion"] = _rate(
         row["pass_yards"], row["completions"], zero_value=0.0
     )
-    row["sack_avoidance"] = 1.0 - _rate(
-        row["sacks"], row["pass_attempts"] + row["sacks"], zero_value=0.0
+    row["sack_avoidance"] = (
+        None
+        if row["sacks"] is None
+        else 1.0
+        - _rate(
+            row["sacks"], row["pass_attempts"] + row["sacks"], zero_value=0.0
+        )
     )
-    row["non_sack_rush_attempts"] = max(0, row["rush_attempts"] - row["sacks"])
+    row["non_sack_rush_attempts"] = (
+        None
+        if row["sacks"] is None
+        else max(0, row["rush_attempts"] - row["sacks"])
+    )
     row["rush_yards_per_opportunity"] = _rate(
         row["rush_yards"], row["offensive_opportunities"], zero_value=0.0
     )
-    row["non_sack_rush_share"] = _rate(
-        row["non_sack_rush_attempts"], row["offensive_opportunities"], zero_value=0.0
+    row["non_sack_rush_share"] = (
+        None
+        if row["non_sack_rush_attempts"] is None
+        else _rate(
+            row["non_sack_rush_attempts"],
+            row["offensive_opportunities"],
+            zero_value=0.0,
+        )
     )
 
     row["pbp_coverage"] = _rate(row["pbp_pass_attempts"], row["pass_attempts"])
@@ -294,7 +317,11 @@ def score_records(
         if row.get("mapq") is None:
             row["tier"] = "Unscored"
             row["data_status"] = (
-                "No college stats" if row["stats_season"] is None else "Insufficient sample"
+                "No college stats"
+                if row["stats_season"] is None
+                else "Missing sack data"
+                if row["sacks"] is None
+                else "Insufficient sample"
             )
         else:
             score = row["mapq"]

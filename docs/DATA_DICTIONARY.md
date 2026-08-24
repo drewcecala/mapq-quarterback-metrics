@@ -19,7 +19,7 @@ The scorer accepts a JSON array, a JSON object with a `records` array, or a CSV 
 | `pass_yards` | integer | Official passing yards; may be negative |
 | `interceptions` | integer | Interceptions thrown |
 | `long_pass` | integer | Longest completed pass in yards |
-| `sacks` | integer | Sacks taken under the source's accounting |
+| `sacks` | integer or null | Sacks taken under the source's accounting. A null value makes MAP-Q ineligible unless complete play-by-play coverage can supply it. |
 | `rush_attempts` | integer | Official quarterback rush attempts |
 | `rush_yards` | integer | Official quarterback rushing yards; may be negative |
 | `long_rush` | integer | Longest quarterback rush in yards |
@@ -56,7 +56,7 @@ These fields may be zero when play-level data are unavailable. The corresponding
 | `defense_stress_index` | 0–100 or null | Reliability-adjusted field-stress score |
 | `drive_extension_index` | 0–100 or null | Third-down conversion/TD/sack-avoidance score |
 | `escape_to_explosive_rate_proxy` | 0–1 or null | Successful estimated escapes divided by opportunities |
-| `data_status` | text | Qualified, provisional, insufficient sample, or no college stats |
+| `data_status` | text | Qualified, provisional, insufficient sample, missing sack data, or no college stats |
 | `advanced_data_status` | text | Which advanced metrics meet coverage and sample gates |
 
 The engine also returns all intermediate rates, percentiles, component scores, and ranks needed to audit the final values.

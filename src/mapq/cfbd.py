@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
+from .model import DEFAULT_CONFIG
+
 API_BASE = "https://api.collegefootballdata.com"
 TERMS_URL = "https://collegefootballdata.com/terms"
 DEFAULT_SEASONS = (2026, 2025, 2024, 2023)
@@ -229,7 +231,7 @@ def _aggregate_season_stats(rows: Iterable[Mapping[str, Any]]) -> dict[tuple[str
                 "pass_yards": 0,
                 "interceptions": 0,
                 "long_pass": 0,
-                "sacks": 0,
+                "sacks": None,
                 "rush_attempts": 0,
                 "rush_yards": 0,
                 "long_rush": 0,
@@ -262,6 +264,8 @@ def _aggregate_season_stats(rows: Iterable[Mapping[str, Any]]) -> dict[tuple[str
         if field in {"long_pass", "long_rush"}:
             bucket[field] = max(bucket[field], value)
         else:
+            if bucket[field] is None:
+                bucket[field] = 0
             bucket[field] += value
     return output
 
@@ -493,7 +497,10 @@ def build_normalized_dataset(
             "pass_yards": selected["pass_yards"] if selected else 0,
             "interceptions": selected["interceptions"] if selected else 0,
             "long_pass": selected["long_pass"] if selected else 0,
-            "sacks": selected["sacks"] if selected else 0,
+            "sacks": selected["sacks"] if selected else None,
+            "sacks_source": (
+                "season" if selected and selected["sacks"] is not None else None
+            ),
             "rush_attempts": selected["rush_attempts"] if selected else 0,
             "rush_yards": selected["rush_yards"] if selected else 0,
             "long_rush": selected["long_rush"] if selected else 0,
@@ -525,7 +532,21 @@ def build_normalized_dataset(
 
         for record in records:
             if record["pbp_pass_attempts"] or record["pbp_qb_rushes"] or record["pbp_sacks"]:
-                record["sacks"] = record["pbp_sacks"]
+                pass_attempts = record["pass_attempts"]
+                coverage = (
+                    record["pbp_pass_attempts"] / pass_attempts
+                    if pass_attempts
+                    else None
+                )
+                coverage_ok = (
+                    coverage is not None
+                    and DEFAULT_CONFIG.pbp_coverage_min
+                    <= coverage
+                    <= DEFAULT_CONFIG.pbp_coverage_max
+                )
+                if record["sacks"] is None and coverage_ok:
+                    record["sacks"] = record["pbp_sacks"]
+                    record["sacks_source"] = "play-by-play"
                 record["long_pass"] = max(record["long_pass"], record["pbp_long_pass"])
                 record["long_rush"] = max(record["long_rush"], record["pbp_long_rush"])
 

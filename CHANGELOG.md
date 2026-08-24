@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 — 2026-08-24
+
+- Preserve official season sacks instead of overwriting them with partial play-by-play totals.
+- Fill missing sacks from play-by-play only when pass-attempt coverage reconciles to 85–115%.
+- Withhold MAP-Q when sack data remain unresolved instead of silently treating the value as zero.
+- Add regression coverage for missing season sacks and incomplete play-by-play.
+
 ## 1.1.0 — 2026-08-24
 
 - Added 2026 production-season support and rolled recency weights forward while retaining 2023 as a reduced-weight fallback.
