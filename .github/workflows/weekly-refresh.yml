@@ -120,7 +120,7 @@ jobs:
           fi
           git diff --cached --check
           python tools/release_check.py
-          git config user.name "drewcecala"
-          git config user.email "drewcecala@gmail.com"
+          git config user.name "Drew Cecala"
+          git config user.email "319488773+heHate-Me@users.noreply.github.com"
           git commit -m "Refresh weekly QB rankings ($(date -u +%F))"
           git push origin HEAD:main
