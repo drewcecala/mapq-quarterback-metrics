@@ -25,6 +25,7 @@ REQUIRED = {
     "docs/DATA_RIGHTS.md",
     "docs/METHODOLOGY.md",
     "docs/PLAYER_VERIFICATION.md",
+    "docs/readme-hero.png",
     "docs/RELEASE_CHECKLIST.md",
     "docs/SOURCE_EVALUATION.md",
     "docs/VERIFICATION_REPORT_2026-08-24.md",
@@ -48,6 +49,12 @@ REQUIRED = {
     "tests/test_verify.py",
     "tools/check_cfbd_terms.py",
     "tools/validate_release_data.py",
+}
+ALLOWED_BINARY_FILES = {
+    "docs/readme-hero.png": {
+        "signature": b"\x89PNG\r\n\x1a\n",
+        "max_bytes": 5 * 1024 * 1024,
+    },
 }
 FORBIDDEN_PATH_PARTS = {"outputs", "work", "scripts", "__pycache__", "node_modules"}
 SECRET_PATTERNS = {
@@ -125,6 +132,14 @@ def main() -> int:
             for required_text in REQUIRED_WORKBOOK_TEXT:
                 if required_text not in text:
                     errors.append(f"release workbook missing {required_text!r}: {rel}")
+        elif rel.as_posix() in ALLOWED_BINARY_FILES:
+            policy = ALLOWED_BINARY_FILES[rel.as_posix()]
+            data = path.read_bytes()
+            if not data.startswith(policy["signature"]):
+                errors.append(f"allowed binary has an invalid file signature: {rel}")
+            if len(data) > policy["max_bytes"]:
+                errors.append(f"allowed binary exceeds size limit: {rel}")
+            continue
         else:
             try:
                 text = path.read_text(encoding="utf-8")
