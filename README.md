@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/readme-hero.png" alt="Editorial illustration of quarterback mobility, throwing, and precision metrics" width="100%">
+</p>
+
 # MAP-Q quarterback metric engine
 
 MAP-Q (Mobility, Arm & Precision Quotient) is an original 0–100 quarterback evaluation framework. It rewards quarterbacks who combine passing capability with movement capability, then reduces the influence of small or older samples.
